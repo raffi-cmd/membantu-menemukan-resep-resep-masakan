@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dapur Pintar — Masak Enak dari Bahan Seadanya</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['"Playfair Display"', 'serif'],
+          },
+          colors: {
+            sage: {
+              50: '#f4f7f4',
+              100: '#e5ece5',
+              200: '#ccd9cc',
+              500: '#52796f',
+              600: '#354f52',
+              800: '#2f3e46',
+            },
+            terracotta: {
+              50: '#fdf6f0',
+              100: '#faebd7',
+              400: '#e07a5f',
+              500: '#d96b4d',
+              600: '#bc5438',
+            },
+            honey: {
+              400: '#f4a261',
+              500: '#e76f51',
+            }
+          },
+          animation: {
+            'float-slow': 'float 6s ease-in-out infinite',
+            'pulse-soft': 'pulseSoft 3s ease-in-out infinite',
+            'slide-up': 'slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+            'pop': 'pop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-8px)' },
+            },
+            pulseSoft: {
+              '0%, 100%': { opacity: '1', transform: 'scale(1)' },
+              '50%': { opacity: '0.85', transform: 'scale(1.02)' },
+            },
+            slideUp: {
+              '0%': { opacity: '0', transform: 'translateY(16px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            pop: {
+              '0%': { transform: 'scale(0.92)' },
+              '100%': { transform: 'scale(1)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <style>
+    /* Custom organic styling */
+    body {
+      background-color: #faf7f2;
+      background-image: radial-gradient(#e7ded3 0.75px, transparent 0.75px);
+      background-size: 18px 18px;
+    }
+    
+    .glass-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .badge-glow {
+      box-shadow: 0 4px 14px 0 rgba(224, 122, 95, 0.3);
+    }
+
+    /* Hide scrollbar clean */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Checkbox bounce */
+    .chip-checkbox:checked + span {
+      background-color: #d96b4d;
+      color: #ffffff;
+      border-color: #d96b4d;
+      box-shadow: 0 4px 12px rgba(217, 107, 77, 0.35);
+      transform: translateY(-2px);
+    }
+
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #f1ede6;
+      border-radius: 999px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #cfc7bc;
+      border-radius: 999px;
+    }
+  </style>
+</head>
+<body class="text-stone-800 antialiased min-h-screen flex flex-col selection:bg-terracotta-100 selection:text-terracotta-600">
+
+  <!-- TOP HEADER / NAV -->
+  <header class="sticky top-0 z-40 border-b border-stone-200/70 glass-card transition-all duration-300">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-terracotta-500 to-honey-400 flex items-center justify-center text-white shadow-md shadow-terracotta-500/20 group-hover:rotate-6 transition-transform">
+          <i data-lucide="utensils" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <span class="font-serif font-bold text-xl sm:text-2xl text-stone-900 tracking-tight block leading-none">Dapur<span class="text-terracotta-500 font-sans italic">Pintar</span></span>
+          <span class="text-[11px] text-stone-500 font-medium tracking-wide">Penyelamat Isi Kulkas</span>
+        </div>
+      </a>
+
+      <!-- Quick Actions -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Favorites Counter / Drawer Trigger -->
+        <button id="btnBookmarkModal" class="relative flex items-center gap-1.5 px-3 py-2 rounded-xl text-stone-700 hover:bg-stone-100/80 transition-colors">
+          <i data-lucide="bookmark" class="w-5 h-5 text-terracotta-500"></i>
+          <span class="text-xs font-semibold hidden sm:inline">Tersimpan</span>
+          <span id="bookmarkCount" class="w-5 h-5 rounded-full bg-terracotta-500 text-white text-[11px] font-bold flex items-center justify-center">0</span>
+        </button>
+
+        <!-- Quick Reset Pantry -->
+        <button id="btnResetPantry" title="Reset Semua Pilihan" class="p-2 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors">
+          <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- HERO SECTION -->
+  <section class="relative overflow-hidden pt-8 pb-10 sm:pt-14 sm:pb-16 px-4">
+    <div class="max-w-4xl mx-auto text-center relative z-10">
+      
+      <!-- Organic Badge -->
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-100/70 border border-amber-200/80 text-amber-900 text-xs font-semibold mb-4 animate-slide-up">
+        <span class="w-2 h-2 rounded-full bg-terracotta-500 animate-ping"></span>
+        Zero Food Waste • Masak Praktis
+      </div>
+
+      <h1 class="font-serif text-3xl sm:text-5xl md:text-6xl text-stone-900 font-bold leading-tight tracking-tight mb-4 animate-slide-up">
+        Punya bahan apa saja di kulkas hari ini?
+      </h1>
+      
+      <p class="text-stone-600 text-sm sm:text-lg max-w-2xl mx-auto mb-6 leading-relaxed">
+        Centang bahan yang kamu miliki, lalu biar algoritma pintar kami yang carikan resep masakan rumahan lezat tanpa pusing belanja lagi.
+      </p>
+
+      <!-- Pantry Stats Summary Badge -->
+      <div class="inline-flex items-center gap-4 py-2 px-5 rounded-2xl bg-white/90 shadow-sm border border-stone-200/70 text-xs sm:text-sm font-medium text-stone-600">
+        <span class="flex items-center gap-1.5"><i data-lucide="egg" class="w-4 h-4 text-terracotta-500"></i> <strong id="statSelectedCount" class="text-stone-900">0</strong> bahan dipilih</span>
+        <span class="text-stone-300">|</span>
+        <span class="flex items-center gap-1.5"><i data-lucide="chef-hat" class="w-4 h-4 text-sage-500"></i> <strong id="statMatchCount" class="text-stone-900">12</strong> resep siap diolah</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 pb-24 flex-1">
+    
+    <!-- SECTION 1: PANTRY SELECTION WIDGET -->
+    <div class="bg-white rounded-3xl p-5 sm:p-8 shadow-xl shadow-stone-200/50 border border-stone-200/80 mb-10 transition-all">
+      
+      <!-- Top Bar: Search & Category Tabs -->
+      <div class="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between pb-6 border-b border-stone-100">
+        
+        <!-- Search bar inside ingredients -->
+        <div class="relative w-full md:w-80">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400"></i>
+          <input 
+            type="text" 
+            id="ingredientSearch" 
+            placeholder="Cari bahan (cth: Tempe, Telur)..."
+            class="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-terracotta-400 focus:bg-white transition-all"
+          />
+        </div>
+
+        <!-- Category filter pills -->
+        <div class="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto no-scrollbar pb-1 md:pb-0" id="categoryPills">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Ingredients Grid -->
+      <div class="pt-6">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="font-bold text-stone-900 text-sm tracking-wide uppercase">Pilih Bahan Masakan</h2>
+          <button id="btnSelectAllCommon" class="text-xs font-semibold text-terracotta-600 hover:text-terracotta-700 transition-colors">
+            + Pilih Bahan Pokok (Bawang, Telur, Minyak)
+          </button>
+        </div>
+
+        <div id="ingredientsContainer" class="flex flex-wrap gap-2.5 sm:gap-3 max-h-72 overflow-y-auto custom-scroll pr-1">
+          <!-- Ingredient chips rendered here dynamically -->
+        </div>
+
+        <!-- Custom Add Ingredient form -->
+        <div class="mt-5 pt-4 border-t border-dashed border-stone-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <form id="customIngredientForm" class="flex items-center gap-2 w-full sm:w-auto">
+            <span class="text-stone-500 font-medium">Bahanmu tidak ada di list?</span>
+            <div class="flex items-center gap-1">
+              <input 
+                type="text" 
+                id="customIngredientInput" 
+                placeholder="Tulis nama bahan..." 
+                class="px-3 py-1.5 bg-stone-50 border border-stone-200 rounded-xl text-xs focus:ring-1 focus:ring-terracotta-500 focus:outline-none"
+                required
+              />
+              <button type="submit" class="px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl font-medium transition-colors">
+                Tambah
+              </button>
+            </div>
+          </form>
+
+          <span class="text-stone-400 hidden sm:inline">*Klik bahan untuk memilih atau membatalkan</span>
+        </div>
+      </div>
+
+      <!-- Action Button Area -->
+      <div class="mt-6 pt-5 border-t border-stone-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="text-xs text-stone-500">
+          Tip: Semakin banyak bumbu dasar & bahan yang dipilih, rekomendasi masakan semakin akurat!
+        </div>
+
+        <div class="flex items-center gap-3 w-full sm:w-auto">
+          <button 
+            id="btnFindRecipes" 
+            class="w-full sm:w-auto px-7 py-3.5 bg-gradient-to-r from-terracotta-500 to-honey-400 hover:from-terracotta-600 hover:to-honey-500 text-white rounded-2xl font-bold shadow-lg shadow-terracotta-500/30 active:scale-95 transition-all flex items-center justify-center gap-2">
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+            <span>Temukan Resep Masakan</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SECTION 2: RECIPE RESULTS SECTION -->
+    <div id="recipeSection" class="scroll-mt-24">
+      
+      <!-- Section Title & Filter Sorting -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h2 class="font-serif text-2xl sm:text-3xl font-bold text-stone-900">Rekomendasi Menu Hari Ini</h2>
+          <p class="text-stone-500 text-xs sm:text-sm mt-0.5" id="recipeFilterSubtitle">Menampilkan resep yang paling cocok dengan bahan yang kamu miliki.</p>
+        </div>
+
+        <!-- Filter Dropdown & Match Toggle -->
+        <div class="flex items-center gap-2 self-stretch sm:self-auto justify-between sm:justify-start">
+          <select id="sortFilter" class="bg-white border border-stone-200 text-stone-700 text-xs rounded-xl px-3 py-2 focus:ring-1 focus:ring-terracotta-500 focus:outline-none">
+            <option value="match">Urutkan: Kecocokan Tertinggi</option>
+            <option value="time">Urutkan: Waktu Tercepat</option>
+            <option value="easy">Urutkan: Tingkat Termudah</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Recipes Grid -->
+      <div id="recipesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Recipe cards rendered here -->
+      </div>
+
+      <!-- Empty state when no recipe matches -->
+      <div id="emptyState" class="hidden bg-white rounded-3xl p-10 text-center border border-dashed border-stone-300 max-w-lg mx-auto mt-6">
+        <div class="w-16 h-16 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i data-lucide="cooking-pot" class="w-8 h-8"></i>
+        </div>
+        <h3 class="font-serif font-bold text-stone-900 text-xl mb-1">Belum Ada Resep yang Pas</h3>
+        <p class="text-stone-500 text-xs sm:text-sm mb-5 leading-relaxed">
+          Coba pilih minimal 2 atau 3 bahan lagi (misalnya Telur, Bawang, atau Nasi) agar kami bisa merekomendasikan masakan enak.
+        </p>
+        <button id="btnResetToPopular" class="px-5 py-2.5 bg-terracotta-500 hover:bg-terracotta-600 text-white rounded-xl text-xs font-semibold transition-colors">
+          Pilihkan Bahan Populer
+        </button>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- RECIPE DETAIL MODAL -->
+  <div id="recipeModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-950/60 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300">
+    <div id="recipeModalContent" class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300">
+      
+      <!-- Modal Header Banner -->
+      <div class="relative h-44 sm:h-52 bg-stone-900 flex-shrink-0">
+        <img id="modalImage" src="" alt="Recipe image" class="w-full h-full object-cover opacity-80" />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
+        
+        <!-- Close button -->
+        <button id="btnCloseModal" class="absolute top-4 right-4 w-9 h-9 bg-black/40 hover:bg-black/70 backdrop-blur-md rounded-full text-white flex items-center justify-center transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+
+        <!-- Bookmark button inside modal -->
+        <button id="btnModalBookmark" class="absolute top-4 left-4 w-9 h-9 bg-black/40 hover:bg-black/70 backdrop-blur-md rounded-full text-white flex items-center justify-center transition-colors">
+          <i data-lucide="bookmark" class="w-5 h-5"></i>
+        </button>
+
+        <!-- Title in Header -->
+        <div class="absolute bottom-4 left-4 right-4 text-white">
+          <div class="flex items-center gap-2 mb-1">
+            <span id="modalCategory" class="px-2.5 py-0.5 rounded-full bg-terracotta-500 text-[10px] font-bold uppercase tracking-wider text-white"></span>
+            <span id="modalMatchBadge" class="px-2 py-0.5 rounded-full bg-emerald-500/90 text-[10px] font-bold text-white flex items-center gap-1">
+              <i data-lucide="check-check" class="w-3 h-3"></i> 100% Cocok
+            </span>
+          </div>
+          <h2 id="modalTitle" class="font-serif text-2xl sm:text-3xl font-bold leading-tight"></h2>
+        </div>
+      </div>
+
+      <!-- Quick Metrics Ribbon -->
+      <div class="grid grid-cols-3 border-b border-stone-100 bg-stone-50/70 text-center py-3 text-xs font-medium text-stone-600">
+        <div class="flex items-center justify-center gap-1.5 border-r border-stone-200/60">
+          <i data-lucide="clock" class="w-4 h-4 text-stone-400"></i>
+          <span id="modalTime">20 Menit</span>
+        </div>
+        <div class="flex items-center justify-center gap-1.5 border-r border-stone-200/60">
+          <i data-lucide="flame" class="w-4 h-4 text-terracotta-500"></i>
+          <span id="modalDifficulty">Mudah</span>
+        </div>
+        <div class="flex items-center justify-center gap-1.5">
+          <i data-lucide="users" class="w-4 h-4 text-sage-600"></i>
+          <span id="modalServings">2 Porsi</span>
+        </div>
+      </div>
+
+      <!-- Scrollable Modal Body -->
+      <div class="p-5 sm:p-6 overflow-y-auto custom-scroll space-y-6">
+        
+        <!-- Description -->
+        <p id="modalDescription" class="text-stone-600 text-sm leading-relaxed italic border-l-2 border-terracotta-400 pl-3"></p>
+
+        <!-- Cooking Timer Helper Tool -->
+        <div class="bg-amber-50/80 border border-amber-200/80 rounded-2xl p-4 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-sm">
+              <i data-lucide="timer" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-amber-900">Timer Memasak Praktis</h4>
+              <p class="text-[11px] text-amber-700" id="timerLabel">Atur waktu saat proses memasak</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="timerDisplay" class="font-mono font-bold text-amber-900 text-sm bg-white px-2.5 py-1 rounded-lg border border-amber-200">05:00</span>
+            <button id="btnStartTimer" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg transition-colors">
+              Start
+            </button>
+          </div>
+        </div>
+
+        <!-- Ingredients Checklist -->
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-serif font-bold text-stone-900 text-base">Bahan-Bahan Diperlukan</h3>
+            <span class="text-[11px] text-stone-400">Centang saat menyiapkan</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" id="modalIngredientsList">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Step-by-Step Cooking Steps -->
+        <div>
+          <h3 class="font-serif font-bold text-stone-900 text-base mb-3">Langkah-Langkah Memasak</h3>
+          <div class="space-y-3" id="modalStepsList">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Chef's Pro Tip -->
+        <div class="bg-emerald-50 border border-emerald-200/70 rounded-2xl p-4 flex items-start gap-3">
+          <i data-lucide="lightbulb" class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <h4 class="text-xs font-bold text-emerald-900 mb-0.5">Tips Dapur Pintar</h4>
+            <p id="modalTip" class="text-xs text-emerald-800 leading-relaxed"></p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 bg-stone-50 border-t border-stone-100 flex items-center justify-between">
+        <button id="btnFinishCooking" class="w-full py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>Selesai Memasak! (Rayakan)</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SAVED RECIPES DRAWER / MODAL -->
+  <div id="bookmarkDrawer" class="fixed inset-0 z-50 flex justify-end bg-stone-950/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+    <div id="bookmarkDrawerContent" class="bg-white w-full max-w-md h-full shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300">
+      
+      <!-- Drawer Header -->
+      <div class="p-5 border-b border-stone-100 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="bookmark" class="w-5 h-5 text-terracotta-500"></i>
+          <h3 class="font-serif font-bold text-lg text-stone-900">Resep Tersimpan</h3>
+        </div>
+        <button id="btnCloseBookmark" class="w-8 h-8 rounded-full hover:bg-stone-100 text-stone-500 flex items-center justify-center">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Drawer Body -->
+      <div id="bookmarkListContainer" class="flex-1 overflow-y-auto p-5 custom-scroll space-y-3">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Drawer Footer -->
+      <div class="p-4 border-t border-stone-100 bg-stone-50 text-center">
+        <p class="text-[11px] text-stone-400">Resep tersimpan aman di browser kamu (Local Storage).</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="mt-auto border-t border-stone-200/80 bg-white/70 backdrop-blur py-8 text-center text-xs text-stone-500">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2 font-medium">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        Dapur Pintar © 2026 — Sahabat Kuliner Harian Anda
+      </div>
+      <p class="text-stone-400">Masak higienis, hemat pengeluaran, kurangi limbah sisa makanan.</p>
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT APPLICATION LOGIC -->
+  <script>
+    // ==========================================
+    // 1. MASTER DATA: INGREDIENTS & RECIPES
+    // ==========================================
+    const DEFAULT_INGREDIENTS = [
+      // Protein
+      { id: 'telur', name: 'Telur Ayam', category: 'protein', icon: 'egg' },
+      { id: 'ayam', name: 'Daging Ayam', category: 'protein', icon: 'drumstick' },
+      { id: 'tahu', name: 'Tahu Putih/Kuning', category: 'protein', icon: 'box' },
+      { id: 'tempe', name: 'Tempe', category: 'protein', icon: 'layers' },
+      { id: 'sosis', name: 'Sosis / Bakso', category: 'protein', icon: 'circle-dot' },
+      { id: 'udang', name: 'Udang / Seafood', category: 'protein', icon: 'fish' },
+      
+      // Karbohidrat
+      { id: 'nasi', name: 'Nasi Putih', category: 'karbo', icon: 'soup' },
+      { id: 'mie', name: 'Mie Instan / Telur', category: 'karbo', icon: 'align-justify' },
+      { id: 'roti', name: 'Roti Tawar', category: 'karbo', icon: 'square' },
+      { id: 'kentang', name: 'Kentang', category: 'karbo', icon: 'circle' },
+
+      // Bumbu & Sayur
+      { id: 'bawang-merah', name: 'Bawang Merah', category: 'bumbu', icon: 'sparkles' },
+      { id: 'bawang-putih', name: 'Bawang Putih', category: 'bumbu', icon: 'sparkles' },
+      { id: 'cabai', name: 'Cabai (Rawit/Merah)', category: 'bumbu', icon: 'flame' },
+      { id: 'bawang-bombay', name: 'Bawang Bombay', category: 'bumbu', icon: 'circle' },
+      { id: 'kecap-manis', name: 'Kecap Manis', category: 'bumbu', icon: 'droplet' },
+      { id: 'saus-tiram', name: 'Saus Tiram', category: 'bumbu', icon: 'droplet' },
+      { id: 'minyak', name: 'Minyak Goreng / Mentega', category: 'bumbu', icon: 'fuel' },
+      { id: 'garam-gula', name: 'Garam & Gula & Kaldu', category: 'bumbu', icon: 'sparkle' },
+      
+      // Sayuran
+      { id: 'tomat', name: 'Tomat', category: 'sayur', icon: 'apple' },
+      { id: 'wortel', name: 'Wortel', category: 'sayur', icon: 'carrot' },
+      { id: 'kol', name: 'Kol / Kubis', category: 'sayur', icon: 'leaf' },
+      { id: 'sawi', name: 'Sawi / Kangkung / Bayam', category: 'sayur', icon: 'salad' },
+      { id: 'daun-bawang', name: 'Daun Bawang / Seledri', category: 'sayur', icon: 'leaf' }
+    ];
+
+    const RECIPES = [
+      {
+        id: 'nasi-goreng-spesial',
+        title: 'Nasi Goreng Kampung Spesial',
+        description: 'Menu penyelamat paling legendaris dengan aroma bumbu tumis yang gurih dan wangi menggiurkan.',
+        category: 'Nasi & Olahan',
+        difficulty: 'Sangat Mudah',
+        time: '15 Menit',
+        minutes: 15,
+        servings: '1-2 Porsi',
+        image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=800&q=80',
+        coreIngredients: ['nasi', 'telur', 'bawang-merah', 'bawang-putih', 'cabai', 'kecap-manis', 'minyak'],
+        optionalIngredients: ['sosis', 'ayam', 'daun-bawang', 'garam-gula'],
+        steps: [
+          'Iris tipis bawang merah, bawang putih, dan cabai rawit sesuai selera kepedasan.',
+          'Panaskan 2 sdm minyak di wajan, tumis bumbu iris hingga harum dan agak kecokelatan.',
+          'Sisihkan bumbu ke pinggir wajan, ceplok telur lalu orak-arik hingga matang.',
+          'Masukkan nasi putih (sebaiknya nasi dingin/pera), tambahkan kecap manis, garam, dan kaldu bubuk.',
+          'Aduk cepat dengan api besar hingga bumbu tercampur rata dan tercium aroma smoky sedap.',
+          'Angkat dan sajikan selagi hangat dengan taburan daun bawang atau kerupuk!'
+        ],
+        tip: 'Gunakan nasi sisa semalam yang sudah disimpan di kulkas agar butiran nasi tidak lembek saat digoreng.'
+      },
+      {
+        id: 'telur-dadar-padang',
+        title: 'Telur Dadar Tebal Bumbu Iris',
+        description: 'Telur dadar tebal, renyah di luar dan lembut gurih di dalam dengan aroma daun bawang melimpah.',
+        category: 'Lauk Praktis',
+        difficulty: 'Mudah',
+        time: '12 Menit',
+        minutes: 12,
+        servings: '2-3 Porsi',
+        image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=800&q=80',
+        coreIngredients: ['telur', 'bawang-merah', 'cabai', 'daun-bawang', 'minyak', 'garam-gula'],
+        optionalIngredients: ['bawang-putih', 'kol', 'tahu'],
+        steps: [
+          'Kocok lepas 3 butir telur ayam dalam mangkuk sedang.',
+          'Iris halus daun bawang, bawang merah, dan cabai rawit.',
+          'Campurkan irisan bumbu ke dalam kocokan telur, tambahkan sejumput garam dan lada bubuk.',
+          'Panaskan minyak agak banyak dengan api sedang-kecil di wajan cekung.',
+          'Tuang adonan telur, biarkan bagian bawah mengering dan kecokelatan, lalu balik perlahan.',
+          'Goreng hingga kedua sisi matang keemasan dan mengembang krispi.'
+        ],
+        tip: 'Tambahkan 1 sdm tepung terigu atau tepung beras yang dilarutkan sedikit air ke kocokan telur agar hasil dadar lebih kokoh dan tebal.'
+      },
+      {
+        id: 'tumis-tahu-tempe-kecap',
+        title: 'Tumis Tahu Tempe Manis Gurih',
+        description: 'Olahan protein nabati ekonomis bernutrisi tinggi dengan balutan saus kecap gurih legit.',
+        category: 'Tumisan Sehat',
+        difficulty: 'Mudah',
+        time: '20 Menit',
+        minutes: 20,
+        servings: '3-4 Porsi',
+        image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80',
+        coreIngredients: ['tahu', 'tempe', 'bawang-merah', 'bawang-putih', 'cabai', 'kecap-manis', 'minyak'],
+        optionalIngredients: ['saus-tiram', 'daun-bawang', 'tomat'],
+        steps: [
+          'Potong dadu tempe dan tahu sesuai selera.',
+          'Goreng tahu dan tempe sebentar hingga berkulit (setengah matang), lalu tiriskan.',
+          'Tumis irisan bawang merah, bawang putih, dan cabai hingga wangi semerbak.',
+          'Masukkan tahu dan tempe goreng, lalu tambahkan kecap manis, sedikit saus tiram, dan 50ml air.',
+          'Masak hingga kuah bumbu meresap sempurna dan mengental.',
+          'Koreksi rasa dengan garam dan sajikan bersama nasi hangat.'
+        ],
+        tip: 'Jangan goreng tahu dan tempe terlalu kering agar bumbu kecap manis bisa meresap sempurna hingga ke dalam seratnya.'
+      },
+      {
+        id: 'mie-nyemek-pedas',
+        title: 'Mie Nyemek Telur Pedas Nagih',
+        description: 'Kreasi mie instan/telur dengan kuah kental gurih, cabai melimpah, dan telur yang creamy.',
+        category: 'Mie & Kuah',
+        difficulty: 'Sangat Mudah',
+        time: '10 Menit',
+        minutes: 10,
+        servings: '1 Porsi',
+        image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=800&q=80',
+        coreIngredients: ['mie', 'telur', 'bawang-merah', 'bawang-putih', 'cabai', 'kecap-manis', 'minyak'],
+        optionalIngredients: ['sawi', 'kol', 'sosis', 'tomat', 'daun-bawang'],
+        steps: [
+          'Tumis bawang merah, bawang putih, dan irisan cabai hingga layu.',
+          'Tuang 250ml air, tunggu hingga mulai mendidih.',
+          'Masukkan mie dan sayuran (sawi/kol) jika ada.',
+          'Ceplok telur langsung ke dalam kuah mendidih, diamkan sebentar lalu aduk perlahan agar kuah mengental creamy.',
+          'Beri bumbu mie, 1 sdt kecap manis, dan sedikit saus cabai.',
+          'Masak hingga kuah tersisa sedikit (nyemek) dan sajikan panas-panas.'
+        ],
+        tip: 'Tambahkan irisan tomat segar di akhir proses untuk memberi sensasi rasa asam segar alami pada kuah gurihnya.'
+      },
+      {
+        id: 'ayam-goreng-mentega',
+        title: 'Ayam Goreng Saus Mentega Praktis',
+        description: 'Potongan ayam gurih yang dibalut saus mentega harum manis bertabur bawang bombay.',
+        category: 'Lauk Utama',
+        difficulty: 'Sedang',
+        time: '25 Menit',
+        minutes: 25,
+        servings: '3-4 Porsi',
+        image: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=800&q=80',
+        coreIngredients: ['ayam', 'bawang-bombay', 'bawang-putih', 'kecap-manis', 'minyak', 'garam-gula'],
+        optionalIngredients: ['saus-tiram', 'tomat', 'cabai'],
+        steps: [
+          'Potong ayam ukuran sedang, marinasi dengan garam dan lada selama 10 menit.',
+          'Goreng ayam dalam minyak panas hingga matang kecokelatan, tiriskan.',
+          'Panaskan 2 sdm mentega/margarin, tumis bawang putih cincang dan irisan bawang bombay hingga harum layu.',
+          'Masukkan kecap manis, saus tiram, dan sedikit perasan jeruk nipis/tomat.',
+          'Masukkan ayam goreng, aduk cepat hingga seluruh permukaan ayam terbalut saus mentega berkilau.',
+          'Sajikan segera dengan nasi putih pulen.'
+        ],
+        tip: 'Gunakan api besar saat mengaduk ayam dengan saus mentega agar saus cepat mengkaramelisasi tanpa membuat ayam jadi alot.'
+      },
+      {
+        id: 'sup-sayur-telur-puyuh-ayam',
+        title: 'Sup Bening Sayur Segar Hangat',
+        description: 'Sup kuah bening kaya nutrisi dengan kaldu alami yang menenangkan perut.',
+        category: 'Sup & Kuah',
+        difficulty: 'Mudah',
+        time: '20 Menit',
+        minutes: 20,
+        servings: '3 Porsi',
+        image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80',
+        coreIngredients: ['wortel', 'kol', 'bawang-putih', 'bawang-merah', 'garam-gula'],
+        optionalIngredients: ['ayam', 'kentang', 'sosis', 'telur', 'daun-bawang'],
+        steps: [
+          'Tumis bawang putih dan bawang merah geprek hingga harum, lalu masukkan air 700ml.',
+          'Jika ada ayam atau sosis, masukkan terlebih dahulu untuk membentuk kaldu gurih.',
+          'Masukkan wortel dan kentang yang butuh waktu masak lebih lama.',
+          'Setelah wortel empuk, masukkan kol dan daun bawang.',
+          'Beri garam, gula, dan lada secukupnya. Koreksi rasa dan sajikan hangat.'
+        ],
+        tip: 'Geprek bawang putih alih-alih dihaluskan untuk menghasilkan kuah sup yang tetap jernih dan bening menggugah selera.'
+      },
+      {
+        id: 'orak-arik-tahu-sayur',
+        title: 'Orak-Arik Tahu Telur Gurih',
+        description: 'Perpaduan tahu hancur dan telur orak-arik berpadu sayuran dengan bumbu minimalis nan lezat.',
+        category: 'Tumisan Sehat',
+        difficulty: 'Sangat Mudah',
+        time: '12 Menit',
+        minutes: 12,
+        servings: '2 Porsi',
+        image: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=800&q=80',
+        coreIngredients: ['tahu', 'telur', 'bawang-putih', 'bawang-merah', 'minyak', 'garam-gula'],
+        optionalIngredients: ['wortel', 'kol', 'cabai', 'daun-bawang'],
+        steps: [
+          'Hancurkan tahu putih menggunakan garpu hingga bertekstur butiran kasar.',
+          'Tumis bawang merah, bawang putih, dan cabai cincang hingga wangi.',
+          'Masukkan telur, buat orak-arik hingga setengah matang.',
+          'Masukkan tahu hancur dan serutan wortel/kol.',
+          'Bumbui dengan garam, merica, dan kaldu jamur. Masak hingga tahu agak kering dan beraroma harum.',
+          'Taburi daun bawang sebelum diangkat.'
+        ],
+        tip: 'Peras sedikit air dari tahu putih sebelum dimasak agar tekstur orak-arik tidak terlalu becek.'
+      },
+      {
+        id: 'roti-bakar-telur-keju',
+        title: 'Roti Panggang Telur Lipat Simpel',
+        description: 'Sarapan gaya kafe praktis dalam hitungan menit menggunakan teflon rumahan.',
+        category: 'Sarapan & Snack',
+        difficulty: 'Sangat Mudah',
+        time: '8 Menit',
+        minutes: 8,
+        servings: '1 Porsi',
+        image: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=800&q=80',
+        coreIngredients: ['roti', 'telur', 'minyak'],
+        optionalIngredients: ['sosis', 'daun-bawang', 'bawang-bombay', 'saus-tiram'],
+        steps: [
+          'Kocok 1-2 butir telur dengan sedikit garam dan irisan daun bawang.',
+          'Lelehkan 1 sdt mentega di wajan teflon anti lengket.',
+          'Tuang kocokan telur melebar, lalu letakkan 2 lembar roti tawar di atasnya selagi telur masih basah.',
+          'Balik roti dan telur bersamaan ketika telur mulai set.',
+          'Lipat sisa pinggiran telur ke arah dalam roti, lalu lipat roti menjadi bentuk sandwich.',
+          'Panggang kedua sisi roti hingga garing keemasan. Siap dinikmati!'
+        ],
+        tip: 'Gunakan api kecil agar telur matang sempurna tanpa membuat permukaan roti gosong.'
+      }
+    ];
+
+    // ==========================================
+    // 2. APP STATE MANAGEMENT
+    // ==========================================
+    const state = {
+      ingredients: [...DEFAULT_INGREDIENTS],
+      selectedIngredients: new Set(['telur', 'bawang-merah', 'bawang-putih', 'minyak', 'garam-gula']),
+      activeCategory: 'all',
+      searchQuery: '',
+      bookmarks: JSON.parse(localStorage.getItem('dapur_pintar_bookmarks') || '[]'),
+      currentModalRecipe: null,
+      sortBy: 'match',
+      timerInterval: null,
+      timerSeconds: 300
+    };
+
+    // Category list for chips
+    const CATEGORIES = [
+      { id: 'all', label: 'Semua Bahan' },
+      { id: 'protein', label: 'Protein' },
+      { id: 'karbo', label: 'Karbohidrat' },
+      { id: 'sayur', label: 'Sayuran' },
+      { id: 'bumbu', label: 'Bumbu & Saus' }
+    ];
+
+    // ==========================================
+    // 3. CORE DOM ELEMENTS
+    // ==========================================
+    const el = {
+      ingredientsContainer: document.getElementById('ingredientsContainer'),
+      categoryPills: document.getElementById('categoryPills'),
+      ingredientSearch: document.getElementById('ingredientSearch'),
+      btnFindRecipes: document.getElementById('btnFindRecipes'),
+      btnResetPantry: document.getElementById('btnResetPantry'),
+      btnSelectAllCommon: document.getElementById('btnSelectAllCommon'),
+      customIngredientForm: document.getElementById('customIngredientForm'),
+      customIngredientInput: document.getElementById('customIngredientInput'),
+      recipesGrid: document.getElementById('recipesGrid'),
+      emptyState: document.getElementById('emptyState'),
+      btnResetToPopular: document.getElementById('btnResetToPopular'),
+      sortFilter: document.getElementById('sortFilter'),
+      statSelectedCount: document.getElementById('statSelectedCount'),
+      statMatchCount: document.getElementById('statMatchCount'),
+      recipeFilterSubtitle: document.getElementById('recipeFilterSubtitle'),
+      
+      // Modal
+      recipeModal: document.getElementById('recipeModal'),
+      recipeModalContent: document.getElementById('recipeModalContent'),
+      btnCloseModal: document.getElementById('btnCloseModal'),
+      modalImage: document.getElementById('modalImage'),
+      modalCategory: document.getElementById('modalCategory'),
+      modalMatchBadge: document.getElementById('modalMatchBadge'),
+      modalTitle: document.getElementById('modalTitle'),
+      modalDescription: document.getElementById('modalDescription'),
+      modalTime: document.getElementById('modalTime'),
+      modalDifficulty: document.getElementById('modalDifficulty'),
+      modalServings: document.getElementById('modalServings'),
+      modalIngredientsList: document.getElementById('modalIngredientsList'),
+      modalStepsList: document.getElementById('modalStepsList'),
+      modalTip: document.getElementById('modalTip'),
+      btnModalBookmark: document.getElementById('btnModalBookmark'),
+      btnFinishCooking: document.getElementById('btnFinishCooking'),
+      
+      // Timer in Modal
+      timerDisplay: document.getElementById('timerDisplay'),
+      btnStartTimer: document.getElementById('btnStartTimer'),
+      
+      // Bookmarks Drawer
+      btnBookmarkModal: document.getElementById('btnBookmarkModal'),
+      bookmarkCount: document.getElementById('bookmarkCount'),
+      bookmarkDrawer: document.getElementById('bookmarkDrawer'),
+      bookmarkDrawerContent: document.getElementById('bookmarkDrawerContent'),
+      btnCloseBookmark: document.getElementById('btnCloseBookmark'),
+      bookmarkListContainer: document.getElementById('bookmarkListContainer')
+    };
+
+    // ==========================================
+    // 4. RENDERING FUNCTIONS
+    // ==========================================
+
+    function initCategories() {
+      el.categoryPills.innerHTML = CATEGORIES.map(cat => `
+        <button 
+          data-category="${cat.id}"
+          class="category-btn px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+            state.activeCategory === cat.id 
+              ? 'bg-stone-900 text-white shadow-sm' 
+              : 'bg-stone-100 text-stone-600 hover:bg-stone-200/80'
+          }">
+          ${cat.label}
+        </button>
+      `).join('');
+
+      el.categoryPills.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.activeCategory = btn.dataset.category;
+          initCategories();
+          renderIngredients();
+        });
+      });
+    }
+
+    function renderIngredients() {
+      const query = state.searchQuery.toLowerCase().trim();
+      
+      const filtered = state.ingredients.filter(item => {
+        const matchesCat = state.activeCategory === 'all' || item.category === state.activeCategory;
+        const matchesQuery = item.name.toLowerCase().includes(query);
+        return matchesCat && matchesQuery;
+      });
+
+      if (filtered.length === 0) {
+        el.ingredientsContainer.innerHTML = `
+          <div class="py-6 text-center text-xs text-stone-400 w-full">
+            Bahan tidak ditemukan. Kamu bisa menambahkan via form di bawah!
+          </div>
+        `;
+        return;
+      }
+
+      el.ingredientsContainer.innerHTML = filtered.map(item => {
+        const isChecked = state.selectedIngredients.has(item.id);
+        return `
+          <label class="cursor-pointer select-none group">
+            <input 
+              type="checkbox" 
+              value="${item.id}" 
+              ${isChecked ? 'checked' : ''} 
+              class="chip-checkbox sr-only"
+            />
+            <span class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs font-medium border transition-all duration-200 ${
+              isChecked 
+                ? 'bg-terracotta-500 text-white border-terracotta-500 shadow-md shadow-terracotta-500/20' 
+                : 'bg-stone-50 border-stone-200 text-stone-700 hover:border-stone-300 hover:bg-stone-100'
+            }">
+              <i data-lucide="${item.icon || 'circle'}" class="w-3.5 h-3.5"></i>
+              <span>${item.name}</span>
+            </span>
+          </label>
+        `;
+      }).join('');
+
+      // Attach event listener
+      el.ingredientsContainer.querySelectorAll('input[type="checkbox"]').forEach(input => {
+        input.addEventListener('change', (e) => {
+          if (e.target.checked) {
+            state.selectedIngredients.add(e.target.value);
+          } else {
+            state.selectedIngredients.delete(e.target.value);
+          }
+          updateStats();
+          renderIngredients();
+          renderRecipes();
+        });
+      });
+
+      lucide.createIcons();
+    }
+
+    function calculateRecipeMatch(recipe) {
+      const totalCore = recipe.coreIngredients.length;
+      let matchedCore = 0;
+      const missingIngredients = [];
+
+      recipe.coreIngredients.forEach(id => {
+        if (state.selectedIngredients.has(id)) {
+          matchedCore++;
+        } else {
+          const ingObj = state.ingredients.find(i => i.id === id);
+          missingIngredients.push(ingObj ? ingObj.name : id);
+        }
+      });
+
+      const matchScore = totalCore > 0 ? Math.round((matchedCore / totalCore) * 100) : 0;
+
+      return {
+        score: matchScore,
+        matchedCount: matchedCore,
+        totalCore: totalCore,
+        missing: missingIngredients,
+        isPerfect: matchScore === 100
+      };
+    }
+
+    function renderRecipes() {
+      // Compute scores
+      let scoredRecipes = RECIPES.map(recipe => {
+        const matchData = calculateRecipeMatch(recipe);
+        return {
+          ...recipe,
+          match: matchData
+        };
+      });
+
+      // Sorting
+      if (state.sortBy === 'match') {
+        scoredRecipes.sort((a, b) => b.match.score - a.match.score || a.minutes - b.minutes);
+      } else if (state.sortBy === 'time') {
+        scoredRecipes.sort((a, b) => a.minutes - b.minutes);
+      } else if (state.sortBy === 'easy') {
+        scoredRecipes.sort((a, b) => a.coreIngredients.length - b.coreIngredients.length);
+      }
+
+      // Check for empty state
+      const visibleRecipes = scoredRecipes.filter(r => r.match.score > 0);
+
+      if (visibleRecipes.length === 0) {
+        el.recipesGrid.innerHTML = '';
+        el.emptyState.classList.remove('hidden');
+        el.statMatchCount.innerText = '0';
+        return;
+      }
+
+      el.emptyState.classList.add('hidden');
+      el.statMatchCount.innerText = visibleRecipes.length;
+
+      el.recipesGrid.innerHTML = visibleRecipes.map(recipe => {
+        const isBookmarked = state.bookmarks.includes(recipe.id);
+        const matchBadgeClass = recipe.match.score >= 80 
+          ? 'bg-emerald-500 text-white' 
+          : recipe.match.score >= 50 
+            ? 'bg-amber-500 text-white' 
+            : 'bg-stone-200 text-stone-700';
+
+        return `
+          <div class="bg-white rounded-3xl overflow-hidden border border-stone-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group">
+            
+            <!-- Card Image Box -->
+            <div class="relative h-44 overflow-hidden bg-stone-100">
+              <img 
+                src="${recipe.image}" 
+                alt="${recipe.title}" 
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                loading="lazy"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+
+              <!-- Top Badges -->
+              <div class="absolute top-3 left-3 flex items-center gap-1.5">
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${matchBadgeClass} shadow-md backdrop-blur-md">
+                  ${recipe.match.score}% Cocok
+                </span>
+              </div>
+
+              <!-- Bookmark quick button -->
+              <button 
+                data-bookmark-id="${recipe.id}"
+                class="btn-card-bookmark absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-stone-700 flex items-center justify-center shadow-md transition-all active:scale-90">
+                <i data-lucide="bookmark" class="w-4 h-4 ${isBookmarked ? 'fill-terracotta-500 text-terracotta-500' : ''}"></i>
+              </button>
+
+              <!-- Category Tag on Image -->
+              <span class="absolute bottom-3 left-3 text-white text-[11px] font-medium tracking-wide">
+                ${recipe.category}
+              </span>
+            </div>
+
+            <!-- Card Body -->
+            <div class="p-5 flex-1 flex flex-col justify-between">
+              <div>
+                <h3 class="font-serif font-bold text-stone-900 text-lg group-hover:text-terracotta-600 transition-colors leading-snug mb-1.5">
+                  ${recipe.title}
+                </h3>
+                <p class="text-stone-500 text-xs line-clamp-2 mb-4 leading-relaxed">
+                  ${recipe.description}
+                </p>
+
+                <!-- Missing Ingredients Alert -->
+                ${
+                  recipe.match.missing.length > 0
+                    ? `
+                      <div class="mb-4 bg-amber-50/70 border border-amber-200/60 rounded-xl p-2.5 text-[11px] text-amber-900 flex items-start gap-1.5">
+                        <i data-lucide="alert-circle" class="w-3.5 h-3.5 text-amber-600 flex-shrink-0 mt-0.5"></i>
+                        <span>Kurang: <strong class="font-semibold">${recipe.match.missing.slice(0, 2).join(', ')}${recipe.match.missing.length > 2 ? ' +' + (recipe.match.missing.length - 2) : ''}</strong></span>
+                      </div>
+                    `
+                    : `
+                      <div class="mb-4 bg-emerald-50 border border-emerald-200/60 rounded-xl p-2.5 text-[11px] text-emerald-900 flex items-center gap-1.5">
+                        <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0"></i>
+                        <span>Semua bahan utama tersedia lengkap!</span>
+                      </div>
+                    `
+                }
+              </div>
+
+              <!-- Card Footer Meta & Action -->
+              <div>
+                <div class="flex items-center justify-between text-xs text-stone-500 py-3 border-t border-stone-100">
+                  <span class="flex items-center gap-1"><i data-lucide="clock" class="w-3.5 h-3.5"></i> ${recipe.time}</span>
+                  <span class="flex items-center gap-1"><i data-lucide="flame" class="w-3.5 h-3.5"></i> ${recipe.difficulty}</span>
+                  <span class="flex items-center gap-1"><i data-lucide="users" class="w-3.5 h-3.5"></i> ${recipe.servings}</span>
+                </div>
+
+                <button 
+                  data-recipe-id="${recipe.id}"
+                  class="btn-open-recipe w-full py-2.5 rounded-xl bg-stone-900 hover:bg-terracotta-500 text-white text-xs font-bold transition-all flex items-center justify-center gap-2 group-hover:shadow-md">
+                  <span>Lihat Cara Masak</span>
+                  <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+        `;
+      }).join('');
+
+      // Hook up card buttons
+      el.recipesGrid.querySelectorAll('.btn-open-recipe').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const rId = btn.dataset.recipeId;
+          const targetRecipe = RECIPES.find(r => r.id === rId);
+          if (targetRecipe) openRecipeModal(targetRecipe);
+        });
+      });
+
+      el.recipesGrid.querySelectorAll('.btn-card-bookmark').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const rId = btn.dataset.bookmarkId;
+          toggleBookmark(rId);
+        });
+      });
+
+      lucide.createIcons();
+    }
+
+    function updateStats() {
+      el.statSelectedCount.innerText = state.selectedIngredients.size;
+      el.bookmarkCount.innerText = state.bookmarks.length;
+    }
+
+    // ==========================================
+    // 5. RECIPE DETAIL MODAL LOGIC
+    // ==========================================
+    function openRecipeModal(recipe) {
+      state.currentModalRecipe = recipe;
+      const match = calculateRecipeMatch(recipe);
+
+      el.modalImage.src = recipe.image;
+      el.modalTitle.innerText = recipe.title;
+      el.modalCategory.innerText = recipe.category;
+      el.modalDescription.innerText = `"${recipe.description}"`;
+      el.modalTime.innerText = recipe.time;
+      el.modalDifficulty.innerText = recipe.difficulty;
+      el.modalServings.innerText = recipe.servings;
+      el.modalTip.innerText = recipe.tip;
+
+      el.modalMatchBadge.innerHTML = `
+        <i data-lucide="check-check" class="w-3 h-3"></i> ${match.score}% Cocok
+      `;
+
+      // Set timer to recipe minutes
+      state.timerSeconds = (recipe.minutes || 10) * 60;
+      updateTimerDisplay();
+
+      // Render Ingredients with interactive checkbox
+      const allRecipeIngredients = [
+        ...recipe.coreIngredients.map(id => ({ id, isCore: true })),
+        ...(recipe.optionalIngredients || []).map(id => ({ id, isCore: false }))
+      ];
+
+      el.modalIngredientsList.innerHTML = allRecipeIngredients.map(item => {
+        const ingObj = state.ingredients.find(i => i.id === item.id);
+        const name = ingObj ? ingObj.name : item.id;
+        const haveInPantry = state.selectedIngredients.has(item.id);
+
+        return `
+          <label class="flex items-center gap-2.5 p-2 rounded-xl bg-stone-50 border border-stone-200/80 cursor-pointer hover:bg-stone-100 transition-colors">
+            <input type="checkbox" class="rounded text-terracotta-500 focus:ring-terracotta-400 w-4 h-4" ${haveInPantry ? 'checked' : ''} />
+            <div class="flex-1 text-xs">
+              <span class="${haveInPantry ? 'text-stone-900 font-medium' : 'text-stone-500'}">${name}</span>
+              ${!item.isCore ? '<span class="text-[10px] text-stone-400 italic"> (Opsional)</span>' : ''}
+            </div>
+            ${haveInPantry 
+              ? '<span class="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">Ada di Kulkas</span>' 
+              : '<span class="text-[10px] font-semibold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">Belum Ada</span>'}
+          </label>
+        `;
+      }).join('');
+
+      // Render Step by Step
+      el.modalStepsList.innerHTML = recipe.steps.map((step, idx) => `
+        <div class="flex items-start gap-3 p-3 rounded-2xl bg-stone-50/80 border border-stone-100">
+          <span class="w-6 h-6 rounded-full bg-terracotta-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+            ${idx + 1}
+          </span>
+          <p class="text-xs text-stone-700 leading-relaxed">${step}</p>
+        </div>
+      `).join('');
+
+      // Bookmark button state
+      updateModalBookmarkButton();
+
+      // Show Modal
+      el.recipeModal.classList.remove('opacity-0', 'pointer-events-none');
+      el.recipeModalContent.classList.remove('scale-95');
+      el.recipeModalContent.classList.add('scale-100');
+
+      lucide.createIcons();
+    }
+
+    function closeModal() {
+      el.recipeModal.classList.add('opacity-0', 'pointer-events-none');
+      el.recipeModalContent.classList.remove('scale-100');
+      el.recipeModalContent.classList.add('scale-95');
+      
+      // Stop timer if running
+      if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+        el.btnStartTimer.innerText = 'Start';
+      }
+    }
+
+    function updateModalBookmarkButton() {
+      if (!state.currentModalRecipe) return;
+      const isBookmarked = state.bookmarks.includes(state.currentModalRecipe.id);
+      el.btnModalBookmark.innerHTML = `
+        <i data-lucide="bookmark" class="w-5 h-5 ${isBookmarked ? 'fill-terracotta-500 text-terracotta-500' : 'text-white'}"></i>
+      `;
+      lucide.createIcons();
+    }
+
+    // ==========================================
+    // 6. COOKING TIMER FEATURE
+    // ==========================================
+    function updateTimerDisplay() {
+      const mins = Math.floor(state.timerSeconds / 60);
+      const secs = state.timerSeconds % 60;
+      el.timerDisplay.innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function toggleTimer() {
+      if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+        el.btnStartTimer.innerText = 'Start';
+        el.btnStartTimer.className = 'px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg transition-colors';
+      } else {
+        el.btnStartTimer.innerText = 'Pause';
+        el.btnStartTimer.className = 'px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg transition-colors';
+        state.timerInterval = setInterval(() => {
+          if (state.timerSeconds > 0) {
+            state.timerSeconds--;
+            updateTimerDisplay();
+          } else {
+            clearInterval(state.timerInterval);
+            state.timerInterval = null;
+            el.btnStartTimer.innerText = 'Selesai!';
+            confettiFireworks();
+          }
+        }, 1000);
+      }
+    }
+
+    // ==========================================
+    // 7. BOOKMARKS & STORAGE LOGIC
+    // ==========================================
+    function toggleBookmark(recipeId) {
+      const index = state.bookmarks.indexOf(recipeId);
+      if (index > -1) {
+        state.bookmarks.splice(index, 1);
+      } else {
+        state.bookmarks.push(recipeId);
+      }
+      localStorage.setItem('dapur_pintar_bookmarks', JSON.stringify(state.bookmarks));
+      updateStats();
+      renderRecipes();
+      updateModalBookmarkButton();
+      renderBookmarksDrawer();
+    }
+
+    function renderBookmarksDrawer() {
+      const bookmarkedRecipes = RECIPES.filter(r => state.bookmarks.includes(r.id));
+      
+      if (bookmarkedRecipes.length === 0) {
+        el.bookmarkListContainer.innerHTML = `
+          <div class="text-center py-12 text-stone-400">
+            <i data-lucide="bookmark" class="w-10 h-10 mx-auto mb-2 opacity-40"></i>
+            <p class="text-xs">Belum ada resep yang disimpan.</p>
+          </div>
+        `;
+      } else {
+        el.bookmarkListContainer.innerHTML = bookmarkedRecipes.map(recipe => `
+          <div class="flex items-center gap-3 p-2.5 rounded-2xl bg-stone-50 border border-stone-200/80 hover:bg-stone-100 transition-colors">
+            <img src="${recipe.image}" class="w-14 h-14 rounded-xl object-cover" />
+            <div class="flex-1 min-w-0">
+              <h4 class="font-serif font-bold text-xs text-stone-900 truncate">${recipe.title}</h4>
+              <p class="text-[11px] text-stone-500">${recipe.time} • ${recipe.difficulty}</p>
+              <button data-open-bookmarked="${recipe.id}" class="text-[11px] font-semibold text-terracotta-600 hover:underline mt-1">
+                Buka Resep →
+              </button>
+            </div>
+            <button data-remove-bookmark="${recipe.id}" class="p-1.5 text-stone-400 hover:text-rose-500 transition-colors">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        `).join('');
+
+        el.bookmarkListContainer.querySelectorAll('[data-open-bookmarked]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const r = RECIPES.find(item => item.id === btn.dataset.openBookmarked);
+            if (r) {
+              closeBookmarksDrawer();
+              openRecipeModal(r);
+            }
+          });
+        });
+
+        el.bookmarkListContainer.querySelectorAll('[data-remove-bookmark]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            toggleBookmark(btn.dataset.removeBookmark);
+          });
+        });
+      }
+
+      lucide.createIcons();
+    }
+
+    function openBookmarksDrawer() {
+      renderBookmarksDrawer();
+      el.bookmarkDrawer.classList.remove('opacity-0', 'pointer-events-none');
+      el.bookmarkDrawerContent.classList.remove('translate-x-full');
+    }
+
+    function closeBookmarksDrawer() {
+      el.bookmarkDrawer.classList.add('opacity-0', 'pointer-events-none');
+      el.bookmarkDrawerContent.classList.add('translate-x-full');
+    }
+
+    // ==========================================
+    // 8. ANIMATION & CELEBRATION
+    // ==========================================
+    function confettiFireworks() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
+    }
+
+    // ==========================================
+    // 9. EVENT LISTENERS
+    // ==========================================
+    function setupEvents() {
+      // Search
+      el.ingredientSearch.addEventListener('input', (e) => {
+        state.searchQuery = e.target.value;
+        renderIngredients();
+      });
+
+      // Quick Reset Pantry
+      el.btnResetPantry.addEventListener('click', () => {
+        state.selectedIngredients.clear();
+        updateStats();
+        renderIngredients();
+        renderRecipes();
+      });
+
+      // Add Custom Ingredient
+      el.customIngredientForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const rawName = el.customIngredientInput.value.trim();
+        if (!rawName) return;
+
+        const id = rawName.toLowerCase().replace(/\s+/g, '-');
+        
+        // Avoid duplicate
+        if (!state.ingredients.some(i => i.id === id)) {
+          const newIng = {
+            id,
+            name: rawName,
+            category: 'bumbu',
+            icon: 'check-circle'
+          };
+          state.ingredients.unshift(newIng);
+          state.selectedIngredients.add(id);
+          el.customIngredientInput.value = '';
+          updateStats();
+          renderIngredients();
+          renderRecipes();
+        }
+      });
+
+      // Quick Select Popular
+      const selectPopularHandler = () => {
+        ['bawang-merah', 'bawang-putih', 'telur', 'minyak', 'garam-gula'].forEach(id => state.selectedIngredients.add(id));
+        updateStats();
+        renderIngredients();
+        renderRecipes();
+      };
+
+      el.btnSelectAllCommon.addEventListener('click', selectPopularHandler);
+      el.btnResetToPopular.addEventListener('click', selectPopularHandler);
+
+      // Find Recipes Button Scroll
+      el.btnFindRecipes.addEventListener('click', () => {
+        document.getElementById('recipeSection').scrollIntoView({ behavior: 'smooth' });
+        confettiFireworks();
+      });
+
+      // Sorting
+      el.sortFilter.addEventListener('change', (e) => {
+        state.sortBy = e.target.value;
+        renderRecipes();
+      });
+
+      // Modal Triggers
+      el.btnCloseModal.addEventListener('click', closeModal);
+      el.recipeModal.addEventListener('click', (e) => {
+        if (e.target === el.recipeModal) closeModal();
+      });
+
+      el.btnModalBookmark.addEventListener('click', () => {
+        if (state.currentModalRecipe) {
+          toggleBookmark(state.currentModalRecipe.id);
+        }
+      });
+
+      el.btnFinishCooking.addEventListener('click', () => {
+        confettiFireworks();
+        setTimeout(closeModal, 1200);
+      });
+
+      // Timer
+      el.btnStartTimer.addEventListener('click', toggleTimer);
+
+      // Bookmarks Drawer
+      el.btnBookmarkModal.addEventListener('click', openBookmarksDrawer);
+      el.btnCloseBookmark.addEventListener('click', closeBookmarksDrawer);
+      el.bookmarkDrawer.addEventListener('click', (e) => {
+        if (e.target === el.bookmarkDrawer) closeBookmarksDrawer();
+      });
+
+      // Keyboard escape
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeModal();
+          closeBookmarksDrawer();
+        }
+      });
+    }
+
+    // ==========================================
+    // 10. INITIALIZATION
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', () => {
+      initCategories();
+      renderIngredients();
+      renderRecipes();
+      updateStats();
+      setupEvents();
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
